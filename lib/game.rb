@@ -38,11 +38,6 @@ class Game
      grid.print_board
   end
 
-  private
-
-  def error_ship_size(size)
-    puts "The ship must be #{size} units size." if coordinates.length != size
-  end
 
   def input_validated?(grid, coordinates, size)
     return false unless right_size?(coordinates, size) && right_direction?(coordinates, size)
@@ -55,7 +50,7 @@ class Game
   end
 
   def right_size?(coordinates, size)
-    coordinates.length == size
+    coordinates.length == size && any_consecutive?(coordinates)
   end
 
   def right_direction?(coordinates, size)
@@ -67,6 +62,19 @@ class Game
     end
   end
 
+  def any_consecutive?(coordinates)
+    array = coordinates.join.chars
+
+    array_letters = array.select{ |element| Grid::ROW_LABEL.include?(element) }.map{ |letter| Grid::ROW_LABEL.find_index(letter)}.sort
+    array_numbers = array.select{ |element| Grid::COLUMN_LABEL.include?(element) }.map(&:to_i).sort
+
+    array_validations = []
+    array_validations << true if array_letters.each_cons(2).all? {|a, b| b == a + 1 }
+    array_validations << true if array_numbers.each_cons(2).all? {|a, b| b == a + 1 }
+
+    array_validations.include?(true)
+  end
+
   def error_message(grid, coordinates, size)
     puts "The ship should be of the right size" unless right_size?(coordinates, size)
     puts "The ship should be placed horizontally or vertically" unless right_direction?(coordinates, size)
@@ -75,7 +83,6 @@ class Game
       return  puts "There is already a ship in #{Grid::ROW_LABEL[index_pair[0]]}#{index_pair[1] + 1}" unless grid.free?(index_pair[0], index_pair[1])
     end
   end
-
 end
 
 #should be placed horizontally or vertically

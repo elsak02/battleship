@@ -1,4 +1,5 @@
 class Grid
+  attr_reader :matrix
 
   ROW_LABEL = %w(A B C D E)
   COLUMN_LABEL = %w(1 2 3 4 5)
