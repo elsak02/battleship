@@ -5,8 +5,8 @@ class Game
   attr_reader :grid_player_1, :grid_player_2
 
   def initialize
-    @grid_player_1 = Grid.new
-    @grid_player_2 = Grid.new
+    @grid_player_1 = Grid.new("Player One")
+    @grid_player_2 = Grid.new("Player Two")
   end
 
   def run
@@ -15,6 +15,14 @@ class Game
     set_up!(@grid_player_1, 4)
     set_up!(@grid_player_2, 3)
     set_up!(@grid_player_2, 4)
+    puts "Congratulations! The game is set up now!"
+    loop do
+      play!(@grid_player_1, @grid_player_2)
+      play!(@grid_player_2, @grid_player_1)
+      break if end_of_game?(@grid_player_2, @grid_player_1)
+    end
+    puts "Game is over!"
+    puts "#{find_winner(@grid_player_1, @grid_player_2)} is the winner. Congratulations!"
   end
 
   def welcome!
@@ -26,24 +34,48 @@ class Game
   end
 
   def set_up!(grid, size)
+    puts "#{grid.player_name} board"
+    puts
     grid.print_board
     coordinates = []
     loop do
-     puts "Please enter the coordinates of your ship (#{size} units long). Write the #{size} coordinates as in this example A1 A2 A3 #{"A4" if size == 4}."
-     coordinates = gets.chomp.split
+     coordinates = ask_for_coordinates(size)
      input_validated?(grid, coordinates, size) ? break : error_message(grid, coordinates, size)
     end
      ship = Ship.new(size, coordinates)
      grid.place_ship(ship)
      grid.print_board
+     sleep 2
+     system 'clear'
   end
 
+  def play!(grid_player, grid_opponent)
+    puts "It is your turn #{grid_player.player_name}"
+    grid = Grid.new
+    grid.print_board
+    puts "You can try to shoot one of your opponent's ship."
+    loop do
+       @coordinates = ask_for_coordinates(1)
+        break if shoot_coordinates_validated?(@coordinates)
+    end
+    grid_opponent.mark_shoot!(@coordinates)
+    puts grid_opponent.message
+    sleep 2
+    system 'clear'
+  end
+
+  def ask_for_coordinates(size)
+    example = ""
+    size.times { |i| example = example + " A#{i + 1}" }
+    puts "Please enter the coordinates of the ship (#{size} unit(s) long). Write the #{size} coordinate(s) as in this example:#{example}."
+    gets.chomp.split
+  end
 
   def input_validated?(grid, coordinates, size)
     return false unless right_size?(coordinates, size) && right_direction?(coordinates, size)
 
-    grid.find_indexes(coordinates).each do |index_pair|
-      return false unless grid.free?(index_pair[0], index_pair[1]) && grid.inbound?(index_pair[0], index_pair[1])
+    Grid.find_indexes(coordinates).each do |indexes|
+      return false unless grid.free?(indexes) && Grid.inbound?(indexes)
     end
 
     true
@@ -78,10 +110,23 @@ class Game
   def error_message(grid, coordinates, size)
     puts "The ship should be of the right size" unless right_size?(coordinates, size)
     puts "The ship should be placed horizontally or vertically" unless right_direction?(coordinates, size)
-    grid.find_indexes(coordinates).each do |index_pair|
-      return puts "The ship should be placed within the grid bounds" unless grid.inbound?(index_pair[0], index_pair[1])
-      return  puts "There is already a ship in #{Grid::ROW_LABEL[index_pair[0]]}#{index_pair[1] + 1}" unless grid.free?(index_pair[0], index_pair[1])
+    Grid.find_indexes(coordinates).each do |indexes|
+      return puts "The ship should be placed within the grid bounds" unless Grid.inbound?(indexes)
+      return puts "There is already a ship in #{Grid::ROW_LABEL[indexes[0]]}#{indexes[1] + 1}" unless grid.free?(indexes)
     end
+  end
+
+  def shoot_coordinates_validated?(coordinates)
+    indexes = Grid.find_indexes(coordinates)
+    coordinates.length == 1 && Grid.inbound?(indexes)
+  end
+
+  def end_of_game?(grid_one, grid_two)
+    grid_one.fleet.empty? || grid_two.fleet.empty?
+  end
+
+  def find_winner(grid_one, grid_two)
+    grid_layer_one.fleet.empty? ? grid_player_one.player_name : grid_player_two.player_name
   end
 end
 
