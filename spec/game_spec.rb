@@ -39,6 +39,14 @@ RSpec.describe Game do
       expect(@game.grid_player_1.mark_shoot!(["A1"])).to eq("It's a HIT!")
       expect(@game.grid_player_1.mark_shoot!(["A2"])).to eq("It's a HIT!")
       expect(@game.grid_player_1.mark_shoot!(["A3"])).to eq("It is a SUNK (Ship with size #{ship.size})!")
-  end
+    end
+
+    it "#end_of_game? it ends when all the ships of a player are sunk!" do
+      ship = Ship.new(3, ["A1", "A2", "A3"])
+      @game.grid_player_1.fleet = []
+      @game.grid_player_2.fleet = [ship]
+
+      expect(@game.end_of_game?(@game.grid_player_1, @game.grid_player_2)).to be true
+    end
   end
 end

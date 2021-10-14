@@ -1,3 +1,4 @@
+require 'io/console'
 require_relative "./grid.rb"
 require_relative "./ship.rb"
 
@@ -23,6 +24,7 @@ class Game
     end
     puts "Game is over!"
     puts "#{find_winner(@grid_player_1, @grid_player_2)} is the winner. Congratulations!"
+    puts
   end
 
   def welcome!
@@ -31,6 +33,7 @@ class Game
     puts "You have two ships to place on the board game."
     puts "The small one is three units long and the largest one is four units long."
     puts
+    continue
   end
 
   def set_up!(grid, size)
@@ -45,8 +48,7 @@ class Game
      ship = Ship.new(size, coordinates)
      grid.place_ship(ship)
      grid.print_board
-     sleep 2
-     system 'clear'
+     continue
   end
 
   def play!(grid_player, grid_opponent)
@@ -60,8 +62,9 @@ class Game
     end
     grid_opponent.mark_shoot!(@coordinates)
     puts grid_opponent.message
-    sleep 2
-    system 'clear'
+    # sleep 2
+    # system 'clear'
+    continue
   end
 
   def ask_for_coordinates(size)
@@ -118,6 +121,8 @@ class Game
 
   def shoot_coordinates_validated?(coordinates)
     indexes = Grid.find_indexes(coordinates)
+    puts indexes
+    puts Grid.inbound?(indexes)
     coordinates.length == 1 && Grid.inbound?(indexes)
   end
 
@@ -126,12 +131,14 @@ class Game
   end
 
   def find_winner(grid_one, grid_two)
-    grid_layer_one.fleet.empty? ? grid_player_one.player_name : grid_player_two.player_name
+    grid_one.fleet.empty? ? grid_one.player_name : grid_two.player_name
+  end
+
+  def continue
+    puts "Press any key to continue"
+    STDIN.getch
+    system 'clear'
   end
 end
 
-#should be placed horizontally or vertically
-#should be the right size
-#should not be outbound
-#should not touch another boat
-#should be pair of letter and number
+

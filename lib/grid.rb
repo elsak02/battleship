@@ -1,5 +1,6 @@
 class Grid
   attr_reader :matrix, :fleet, :player_name, :message
+  attr_writer :fleet
 
   ROW_LABEL = %w(A B C D E)
   COLUMN_LABEL = %w(1 2 3 4 5)
@@ -31,7 +32,6 @@ class Grid
   end
 
   def self.find_indexes(coordinates)
-    if coordinates.length > 1
       indexes = []
       coordinates.each do |coordinate|
         index_row = ROW_LABEL.find_index(coordinate.chars[0])
@@ -39,15 +39,10 @@ class Grid
       indexes << [index_row, index_column]
       end
       indexes
-    else
-      index_row = ROW_LABEL.find_index(coordinates.first.chars[0])
-      index_column = coordinates.first.chars[1].to_i - 1
-      [index_row, index_column]
-    end
   end
 
   def mark_shoot!(coordinates)
-    indexes = Grid.find_indexes(coordinates)
+    indexes = Grid.find_indexes(coordinates).first
     if free?(indexes)
       @message = "It's a MISS"
     else
@@ -69,9 +64,7 @@ class Grid
   end
 
   def self.inbound?(indexes)
-    (0..5).include?(indexes[0]) && (0..5).include?(indexes[1])
+    (0..4).include?(indexes[0]) && (0..4).include?(indexes[1])
   end
 end
 
-#check if the other opponent grid is free or not
-#if not free check if there are other cross of the boat
