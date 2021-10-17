@@ -62,8 +62,6 @@ class Game
     end
     grid_opponent.mark_shoot!(@coordinates)
     puts grid_opponent.message
-    # sleep 2
-    # system 'clear'
     continue
   end
 
@@ -120,9 +118,7 @@ class Game
   end
 
   def shoot_coordinates_validated?(coordinates)
-    indexes = Grid.find_indexes(coordinates)
-    puts indexes
-    puts Grid.inbound?(indexes)
+    indexes = Grid.find_indexes(coordinates).first
     coordinates.length == 1 && Grid.inbound?(indexes)
   end
 
